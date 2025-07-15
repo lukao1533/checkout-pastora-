@@ -1,0 +1,232 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Pagamento via PIX</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background-color: #fff;
+      color: #333;
+      text-align: center;
+      padding: 20px;
+    }
+
+    .container {
+      max-width: 500px;
+      margin: 0 auto;
+      background-color: #f9f9f9;
+      padding: 30px;
+      border-radius: 15px;
+      box-shadow: 0 0 10px rgba(0,0,0,0.1);
+    }
+
+    .produto {
+      display: flex;
+      align-items: center;
+      margin-bottom: 20px;
+      text-align: left;
+    }
+
+    .produto img {
+      width: 100px;
+      height: 100px;
+      border-radius: 8px;
+      object-fit: cover;
+      margin-right: 15px;
+    }
+
+    .produto-textos {
+      flex: 1;
+    }
+
+    .produto-textos p {
+      margin: 4px 0;
+    }
+
+    .produto-textos .azul {
+      color: #0056d2;
+      font-size: 14px;
+    }
+
+    .produto-textos .nome {
+      font-weight: bold;
+      font-size: 18px;
+    }
+
+    .produto-textos .valor {
+      font-size: 16px;
+    }
+
+    .valor-risk {
+      text-decoration: line-through;
+      color: #888;
+    }
+
+    .form-section {
+      text-align: left;
+      margin-top: 20px;
+    }
+
+    .form-section h4 {
+      font-size: 16px;
+      margin-bottom: 5px;
+    }
+
+    .form-section input {
+      width: 100%;
+      padding: 10px;
+      margin-bottom: 15px;
+      border-radius: 8px;
+      border: 1px solid #ccc;
+      font-size: 14px;
+    }
+
+    .pix-key {
+      font-size: 0.9rem;
+      background: #eee;
+      padding: 10px;
+      border-radius: 8px;
+      word-wrap: break-word;
+      margin-bottom: 10px;
+      color: #000;
+      user-select: all;
+    }
+
+    .btn {
+      background-color: #00c853;
+      color: #fff;
+      border: none;
+      padding: 12px 20px;
+      border-radius: 8px;
+      font-size: 1rem;
+      cursor: pointer;
+      margin-top: 10px;
+    }
+
+    .btn:hover {
+      background-color: #00e676;
+    }
+
+    .loading {
+      color: #00c853;
+      font-weight: bold;
+      margin-bottom: 10px;
+    }
+
+    .error {
+      color: red;
+      margin-top: 10px;
+      font-weight: bold;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="produto">
+      <img src="https://d1yei2z3i6k35z.cloudfront.net/thumb_150/6875665b9a8ec_photo_5163903141090013259_x.jpg" alt="Produto">
+      <div class="produto-textos">
+        <p class="azul">Você está adquirindo:</p>
+        <p class="nome">PASTORA DANDO A UNÇÃO</p>
+        <p class="valor">💰 <span class="valor-risk">R$17,00</span> por R$8,77</p>
+      </div>
+    </div>
+
+    <div class="form-section">
+      <h4>1️⃣ Dados cadastrais</h4>
+      <input type="text" placeholder="Nome completo" />
+      <input type="email" placeholder="E-mail" />
+    </div>
+
+    <div class="loading" id="loading">Gerando chave PIX...</div>
+
+    <div class="pix-key" id="pixKey">🔑 Aperte abaixo para copiar a chave PIX</div>
+
+    <button class="btn" onclick="copyPixKey()">Copiar chave PIX</button>
+
+    <p>📲 Pague com essa chave no seu app bancário.</p>
+    <p>Após o pagamento, clique no botão abaixo para liberar o conteúdo:</p>
+
+    <button class="btn" onclick="verificarPagamento(event)">✅ Verificar Status do Pagamento</button>
+
+    <div class="error" id="errorMessage"></div>
+  </div>
+
+  <script>
+    let checkoutId = null;
+    let pixKeyText = '';
+
+    async function gerarPix() {
+      const pixKeyDiv = document.getElementById("pixKey");
+      const loadingDiv = document.getElementById("loading");
+      const errorDiv = document.getElementById("errorMessage");
+
+      try {
+        const response = await fetch("/api/gerar-pix", {
+          method: "POST"
+        });
+
+        const data = await response.json();
+
+        if (!response.ok || !data.success) {
+          throw new Error((data?.detalhes||  data?.error||'') +'- Erro ao gerar chave PIX.');
+        }
+
+        checkoutId = data.checkoutId;
+        pixKeyText = data.pixKey;
+
+        pixKeyDiv.innerText = pixKeyText;
+        loadingDiv.style.display = "none";
+        errorDiv.innerText = "";
+
+      } catch (error) {
+        pixKeyDiv.innerText = "❌ Erro ao gerar chave PIX";
+        errorDiv.innerText = error.message;
+        loadingDiv.style.display = "none";
+      }
+    }
+
+    function copyPixKey() {
+      if (!pixKeyText) {
+        alert("Chave PIX ainda não foi gerada.");
+        return;
+      }
+
+      navigator.clipboard.writeText(pixKeyText)
+        .then(() => alert("Chave PIX copiada com sucesso!"))
+        .catch(() => alert("Erro ao copiar a chave PIX."));
+    }
+
+    async function verificarPagamento(event) {
+      if (!checkoutId) {
+        alert("Chave PIX ainda não foi gerada.");
+        return;
+      }
+
+      const statusButton = event.target;
+      statusButton.disabled = true;
+      statusButton.innerText = 'Verificando...';
+
+      try {
+        const response = await fetch(`/api/verificar-pagamento/${checkoutId}`);
+        const data = await response.json();
+
+        if (data.success && data.data.status === "paid") {
+          alert("Pagamento confirmado! Redirecionando...");
+          window.location.href = "https://julia-licee.systeme.io/entregavel";
+        } else {
+          alert("Pagamento ainda não confirmado. Tente novamente em instantes.");
+        }
+      } catch (error) {
+        document.getElementById("errorMessage").innerText = "Erro ao verificar o pagamento.";
+      } finally {
+        statusButton.disabled = false;
+        statusButton.innerText = '✅ Verificar Status do Pagamento';
+      }
+    }
+
+    window.onload = gerarPix;
+  </script>
+</body>
+</html>
