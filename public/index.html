@@ -3,84 +3,73 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Pagamento via PIX</title>
+  <title>Checkout Seguro</title>
   <style>
     body {
       font-family: Arial, sans-serif;
-      background-color: #fff;
-      color: #333;
+      background-color: #ffffff;
+      color: #222;
+      margin: 0;
+      padding: 0;
       text-align: center;
-      padding: 20px;
+    }
+
+    .top-bar {
+      background-color: #00c853;
+      color: white;
+      padding: 10px;
+      font-weight: bold;
+      font-size: 16px;
+      position: fixed;
+      width: 100%;
+      top: 0;
+      z-index: 999;
     }
 
     .container {
+      margin: 80px auto 40px;
       max-width: 500px;
-      margin: 0 auto;
-      background-color: #f9f9f9;
-      padding: 30px;
-      border-radius: 15px;
+      padding: 20px;
+      background: #f5f5f5;
+      border-radius: 12px;
       box-shadow: 0 0 10px rgba(0,0,0,0.1);
     }
 
-    .produto {
+    .header {
       display: flex;
       align-items: center;
-      margin-bottom: 20px;
       text-align: left;
+      gap: 15px;
+      margin-bottom: 20px;
     }
 
-    .produto img {
-      width: 100px;
-      height: 100px;
-      border-radius: 8px;
+    .header img {
+      width: 80px;
+      height: 80px;
       object-fit: cover;
-      margin-right: 15px;
+      border-radius: 10px;
     }
 
-    .produto-textos {
+    .header-text {
       flex: 1;
     }
 
-    .produto-textos p {
-      margin: 4px 0;
-    }
-
-    .produto-textos .azul {
-      color: #0056d2;
-      font-size: 14px;
-    }
-
-    .produto-textos .nome {
-      font-weight: bold;
+    .header-text h3 {
+      margin: 0;
       font-size: 18px;
     }
 
-    .produto-textos .valor {
+    .header-text p {
+      margin: 5px 0 0;
       font-size: 16px;
     }
 
-    .valor-risk {
-      text-decoration: line-through;
-      color: #888;
-    }
-
-    .form-section {
-      text-align: left;
-      margin-top: 20px;
-    }
-
-    .form-section h4 {
-      font-size: 16px;
-      margin-bottom: 5px;
-    }
-
-    .form-section input {
+    form input {
       width: 100%;
       padding: 10px;
-      margin-bottom: 15px;
-      border-radius: 8px;
+      margin-bottom: 12px;
       border: 1px solid #ccc;
-      font-size: 14px;
+      border-radius: 6px;
     }
 
     .pix-key {
@@ -89,30 +78,23 @@
       padding: 10px;
       border-radius: 8px;
       word-wrap: break-word;
-      margin-bottom: 10px;
-      color: #000;
-      user-select: all;
+      margin: 15px 0;
+      color: #222;
+      display: none;
     }
 
     .btn {
       background-color: #00c853;
-      color: #fff;
+      color: white;
       border: none;
       padding: 12px 20px;
       border-radius: 8px;
       font-size: 1rem;
       cursor: pointer;
-      margin-top: 10px;
     }
 
     .btn:hover {
       background-color: #00e676;
-    }
-
-    .loading {
-      color: #00c853;
-      font-weight: bold;
-      margin-bottom: 10px;
     }
 
     .error {
@@ -120,113 +102,165 @@
       margin-top: 10px;
       font-weight: bold;
     }
+
+    .floating-msg {
+      position: fixed;
+      bottom: 20px;
+      left: 20px;
+      background-color: #222;
+      color: #fff;
+      padding: 10px 15px;
+      border-radius: 8px;
+      box-shadow: 0 0 5px rgba(0,0,0,0.4);
+      display: none;
+      z-index: 999;
+    }
   </style>
 </head>
 <body>
+
+  <div class="top-bar">
+    ⏳ Oferta por tempo limitado – <span id="countdown">05:00</span>
+  </div>
+
   <div class="container">
-    <div class="produto">
+    <div class="header">
       <img src="https://d1yei2z3i6k35z.cloudfront.net/thumb_150/6875665b9a8ec_photo_5163903141090013259_x.jpg" alt="Produto">
-      <div class="produto-textos">
-        <p class="azul">Você está adquirindo:</p>
-        <p class="nome">PASTORA DANDO A UNÇÃO</p>
-        <p class="valor">💰 <span class="valor-risk">R$17,00</span> por R$8,97</p>
+      <div class="header-text">
+        <h3>Pastora dando a unção</h3>
+        <p>💰 De <s>R$17,00</s> por R$8,77</p>
       </div>
     </div>
 
-    <div class="form-section">
-      <h4>1️⃣ Dados cadastrais</h4>
-      <input type="text" placeholder="Nome completo" />
-      <input type="email" placeholder="E-mail" />
-    </div>
+    <form id="checkout-form">
+      <input type="text" id="nome" placeholder="Seu nome completo" required>
+      <input type="email" id="email" placeholder="Seu melhor e-mail" required>
+    </form>
 
-    <div class="loading" id="loading">Gerando chave PIX...</div>
+    <div id="pixKey" class="pix-key">🔑 Sua chave PIX aparecerá aqui...</div>
 
-    <div class="pix-key" id="pixKey">🔑 Aperte abaixo para copiar a chave PIX</div>
+    <button id="pixButton" class="btn" onclick="gerarPix()">Gerar chave PIX</button>
 
-    <button class="btn" onclick="copyPixKey()">Copiar chave PIX</button>
-
-    <p>📲 Pague com essa chave no seu app bancário.</p>
-    <p>Após o pagamento, clique no botão abaixo para liberar o conteúdo:</p>
-
-    <button class="btn" onclick="verificarPagamento(event)">✅ Verificar Status do Pagamento</button>
+    <p id="instrucoes" style="display:none;">📲 Copie a chave acima e pague no seu app bancário.</p>
+    <button id="verificarBtn" class="btn" onclick="verificarPagamento(event)" style="display:none;">✅ Verificar Status do Pagamento</button>
 
     <div class="error" id="errorMessage"></div>
   </div>
 
+  <div id="floating-msg" class="floating-msg"></div>
+
   <script>
     let checkoutId = null;
     let pixKeyText = '';
+    const pixButton = document.getElementById("pixButton");
+    const pixKeyDiv = document.getElementById("pixKey");
+    const verificarBtn = document.getElementById("verificarBtn");
+    const instrucoes = document.getElementById("instrucoes");
+    const errorDiv = document.getElementById("errorMessage");
 
     async function gerarPix() {
-      const pixKeyDiv = document.getElementById("pixKey");
-      const loadingDiv = document.getElementById("loading");
-      const errorDiv = document.getElementById("errorMessage");
+      const nome = document.getElementById("nome").value.trim();
+      const email = document.getElementById("email").value.trim();
+      if (!nome || !email) {
+        alert("Preencha seu nome e e-mail antes de gerar a chave PIX.");
+        return;
+      }
+
+      pixButton.disabled = true;
+      pixButton.innerText = "Gerando...";
 
       try {
         const response = await fetch("/api/gerar-pix", {
-          method: "POST"
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ nome, email })
         });
-
         const data = await response.json();
 
-        if (!response.ok || !data.success) {
-          throw new Error((data?.detalhes||  data?.error||'') +'- Erro ao gerar chave PIX.');
-        }
+        if (!response.ok || !data.success) throw new Error(data.detalhes || data.error || "Erro na geração");
 
         checkoutId = data.checkoutId;
         pixKeyText = data.pixKey;
 
         pixKeyDiv.innerText = pixKeyText;
-        loadingDiv.style.display = "none";
-        errorDiv.innerText = "";
+        pixKeyDiv.style.display = "block";
+        instrucoes.style.display = "block";
+        verificarBtn.style.display = "inline-block";
+
+        pixButton.innerText = "Copiar chave PIX";
+        pixButton.disabled = false;
+        pixButton.onclick = copyPixKey;
 
       } catch (error) {
-        pixKeyDiv.innerText = "❌ Erro ao gerar chave PIX";
         errorDiv.innerText = error.message;
-        loadingDiv.style.display = "none";
+        pixButton.innerText = "Gerar chave PIX";
+        pixButton.disabled = false;
       }
     }
 
     function copyPixKey() {
-      if (!pixKeyText) {
-        alert("Chave PIX ainda não foi gerada.");
-        return;
-      }
-
       navigator.clipboard.writeText(pixKeyText)
-        .then(() => alert("Chave PIX copiada com sucesso!"))
-        .catch(() => alert("Erro ao copiar a chave PIX."));
+        .then(() => alert("Chave PIX copiada!"))
+        .catch(() => alert("Erro ao copiar."));
     }
 
     async function verificarPagamento(event) {
       if (!checkoutId) {
-        alert("Chave PIX ainda não foi gerada.");
+        alert("Gere a chave PIX primeiro.");
         return;
       }
 
-      const statusButton = event.target;
-      statusButton.disabled = true;
-      statusButton.innerText = 'Verificando...';
+      const btn = event.target;
+      btn.disabled = true;
+      btn.innerText = "Verificando...";
 
       try {
-        const response = await fetch(`/api/verificar-pagamento/${checkoutId}`);
-        const data = await response.json();
+        const res = await fetch(`/api/verificar-pagamento/${checkoutId}`);
+        const data = await res.json();
 
         if (data.success && data.data.status === "paid") {
-          alert("Pagamento confirmado! Redirecionando...");
+          alert("Pagamento confirmado!");
           window.location.href = "https://julia-licee.systeme.io/entregavel";
         } else {
-          alert("Pagamento ainda não confirmado. Tente novamente em instantes.");
+          alert("Pagamento ainda não confirmado. Tente de novo.");
         }
-      } catch (error) {
-        document.getElementById("errorMessage").innerText = "Erro ao verificar o pagamento.";
+      } catch (e) {
+        errorDiv.innerText = "Erro ao verificar pagamento.";
       } finally {
-        statusButton.disabled = false;
-        statusButton.innerText = '✅ Verificar Status do Pagamento';
+        btn.disabled = false;
+        btn.innerText = "✅ Verificar Status do Pagamento";
       }
     }
 
-    window.onload = gerarPix;
+    function startCountdown(duration) {
+      let timer = duration, minutes, seconds;
+      const countdown = document.getElementById("countdown");
+      setInterval(() => {
+        minutes = parseInt(timer / 60, 10);
+        seconds = parseInt(timer % 60, 10);
+        countdown.textContent = ${minutes < 10 ? "0" : ""}${minutes}:${seconds < 10 ? "0" : ""}${seconds};
+        if (--timer < 0) timer = 0;
+      }, 1000);
+    }
+
+    function showFloatingMessage(text, delay) {
+      setTimeout(() => {
+        const box = document.getElementById("floating-msg");
+        box.innerText = text;
+        box.style.display = "block";
+        setTimeout(() => {
+          box.style.display = "none";
+        }, 2000);
+      }, delay);
+    }
+
+    // Inicia tudo
+    window.onload = () => {
+      startCountdown(300); // 5 minutos
+      showFloatingMessage("7 pessoas estão comprando o conteúdo nesse momento", 5000);
+      showFloatingMessage("14 pessoas estão comprando o conteúdo nesse momento", 18000);
+      showFloatingMessage("35 pessoas estão comprando o conteúdo nesse momento", 27000);
+    };
   </script>
 </body>
 </html>
