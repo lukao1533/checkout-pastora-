@@ -171,8 +171,14 @@
           display = "none";
         document.getElementById("btnCopiar").style.display = "block";
         document.getElementById("btnVerificar").style.display = "block";
-        document.getElementById("mensagemPix").style.display = "block";
+       document.getElementById("btnCopiar").style.display = "inline-block";
 
+// Mostra todas as mensagens com a classe 'mensagem'
+const mensagens = document.querySelectorAll('.mensagem');
+mensagens.forEach(m => m.style.display = 'block');
+
+// Mostra também o botão de verificar pagamento
+document.getElementById("btnVerificar").style.display = "block";
       } catch (err) {
         document.getElementById("erroMsg").innerText = err.message;
         botao.disabled = false;
