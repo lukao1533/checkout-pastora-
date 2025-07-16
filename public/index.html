@@ -2,215 +2,193 @@
 <html lang="pt-BR">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Checkout Seguro</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0" />
+  <title>Checkout - Pastora</title>
   <style>
     body {
       font-family: Arial, sans-serif;
-      background-color: #ffffff;
-      color: #222;
+      background-color: #fff;
+      color: #111;
       margin: 0;
       padding: 0;
       text-align: center;
     }
 
-    .top-bar {
-      background-color: #00c853;
-      color: white;
-      padding: 10px;
-      font-weight: bold;
-      font-size: 16px;
-      position: fixed;
-      width: 100%;
-      top: 0;
-      z-index: 999;
-    }
-
     .container {
-      margin: 80px auto 40px;
-      max-width: 500px;
+      max-width: 480px;
+      margin: 40px auto;
       padding: 20px;
-      background: #f5f5f5;
-      border-radius: 12px;
-      box-shadow: 0 0 10px rgba(0,0,0,0.1);
     }
 
-    .header {
+    .imagem {
       display: flex;
       align-items: center;
-      text-align: left;
       gap: 15px;
       margin-bottom: 20px;
     }
 
-    .header img {
-      width: 80px;
-      height: 80px;
-      object-fit: cover;
+    .imagem img {
+      width: 90px;
+      height: 90px;
       border-radius: 10px;
+      object-fit: cover;
     }
 
-    .header-text {
-      flex: 1;
+    .texto-info {
+      text-align: left;
     }
 
-    .header-text h3 {
-      margin: 0;
+    .texto-info .titulo {
+      font-weight: bold;
       font-size: 18px;
     }
 
-    .header-text p {
-      margin: 5px 0 0;
+    .texto-info .preco {
+      margin-top: 5px;
       font-size: 16px;
     }
 
-    form input {
-      width: 100%;
-      padding: 10px;
-      margin-bottom: 12px;
-      border: 1px solid #ccc;
-      border-radius: 6px;
+    .preco strike {
+      color: #888;
+      margin-right: 5px;
     }
 
-    .pix-key {
-      font-size: 0.9rem;
-      background: #eee;
-      padding: 10px;
+    .pix-topo {
+      background-color: #f4f4f4;
+      color: #111;
+      padding: 15px;
       border-radius: 8px;
-      word-wrap: break-word;
-      margin: 15px 0;
-      color: #222;
+      font-weight: bold;
       display: none;
+      margin-bottom: 20px;
+      word-break: break-all;
+    }
+
+    input[type="text"], input[type="email"] {
+      width: 100%;
+      padding: 12px;
+      margin-bottom: 12px;
+      border-radius: 8px;
+      border: 1px solid #ccc;
+      font-size: 16px;
+      box-sizing: border-box;
     }
 
     .btn {
       background-color: #00c853;
       color: white;
+      padding: 12px;
       border: none;
-      padding: 12px 20px;
       border-radius: 8px;
-      font-size: 1rem;
+      font-size: 16px;
       cursor: pointer;
+      width: 100%;
+      margin-top: 10px;
     }
 
-    .btn:hover {
-      background-color: #00e676;
+    .pix-key {
+      background-color: #f3f3f3;
+      padding: 12px;
+      border-radius: 8px;
+      margin: 20px 0 10px;
+      font-size: 14px;
+      word-break: break-all;
+      color: #000;
+      display: none;
     }
 
-    .error {
+    .mensagem {
+      font-size: 14px;
+      color: #444;
+      margin-top: 10px;
+    }
+
+    .erro {
       color: red;
       margin-top: 10px;
       font-weight: bold;
     }
-
-    .floating-msg {
-      position: fixed;
-      bottom: 20px;
-      left: 20px;
-      background-color: #222;
-      color: #fff;
-      padding: 10px 15px;
-      border-radius: 8px;
-      box-shadow: 0 0 5px rgba(0,0,0,0.4);
-      display: none;
-      z-index: 999;
-    }
   </style>
 </head>
 <body>
-
-  <div class="top-bar">
-    ⏳ Oferta por tempo limitado – <span id="countdown">05:00</span>
-  </div>
-
   <div class="container">
-    <div class="header">
-      <img src="https://d1yei2z3i6k35z.cloudfront.net/thumb_150/6875665b9a8ec_photo_5163903141090013259_x.jpg" alt="Produto">
-      <div class="header-text">
-        <h3>Pastora dando a unção</h3>
-        <p>💰 De <s>R$17,00</s> por R$8,77</p>
+    <div class="pix-topo" id="pixTopo">🔑 Sua chave PIX aparecerá aqui</div>
+
+    <div class="imagem">
+      <img src="https://d1yei2z3i6k35z.cloudfront.net/thumb_150/6875665b9a8ec_photo_5163903141090013259_x.jpg" alt="Pastora">
+      <div class="texto-info">
+        <div class="titulo">Pastora dando a unção</div>
+        <div class="preco">💰 <strike>R$17,00</strike> por R$8,77</div>
       </div>
     </div>
 
-    <form id="checkout-form">
-      <input type="text" id="nome" placeholder="Seu nome completo" required>
-      <input type="email" id="email" placeholder="Seu melhor e-mail" required>
-    </form>
+    <input type="text" id="nome" placeholder="Nome completo" required>
+    <input type="email" id="email" placeholder="Seu e-mail" required>
+    <button class="btn" id="btnPix" onclick="gerarPix()">🔐 Gerar chave PIX</button>
 
-    <div id="pixKey" class="pix-key">🔑 Sua chave PIX aparecerá aqui...</div>
+    <div class="pix-key" id="pixKey">🔑 Sua chave PIX vai aparecer aqui</div>
 
-    <button id="pixButton" class="btn" onclick="gerarPix()">Gerar chave PIX</button>
+    <button class="btn" id="btnCopiar" onclick="copiarChave()" style="display: none;">📋 Copiar chave PIX</button>
 
-    <p id="instrucoes" style="display:none;">📲 Copie a chave acima e pague no seu app bancário.</p>
-    <button id="verificarBtn" class="btn" onclick="verificarPagamento(event)" style="display:none;">✅ Verificar Status do Pagamento</button>
+    <p class="mensagem">📲 Pague com essa chave no seu app bancário.</p>
+    <p class="mensagem">Após o pagamento, clique abaixo para liberar o conteúdo:</p>
+    <button class="btn" onclick="verificarPagamento()" id="btnVerificar" style="display: none;">✅ Verificar pagamento</button>
 
-    <div class="error" id="errorMessage"></div>
+    <div class="erro" id="erroMsg"></div>
   </div>
-
-  <div id="floating-msg" class="floating-msg"></div>
 
   <script>
     let checkoutId = null;
-    let pixKeyText = '';
-    const pixButton = document.getElementById("pixButton");
-    const pixKeyDiv = document.getElementById("pixKey");
-    const verificarBtn = document.getElementById("verificarBtn");
-    const instrucoes = document.getElementById("instrucoes");
-    const errorDiv = document.getElementById("errorMessage");
+    let chavePix = '';
 
     async function gerarPix() {
-      const nome = document.getElementById("nome").value.trim();
-      const email = document.getElementById("email").value.trim();
-      if (!nome || !email) {
-        alert("Preencha seu nome e e-mail antes de gerar a chave PIX.");
-        return;
-      }
-
-      pixButton.disabled = true;
-      pixButton.innerText = "Gerando...";
+      const botao = document.getElementById("btnPix");
+      botao.disabled = true;
+      botao.innerText = "Gerando chave...";
 
       try {
-        const response = await fetch("/api/gerar-pix", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ nome, email })
-        });
+        const response = await fetch("/api/gerar-pix", { method: "POST" });
         const data = await response.json();
 
-        if (!response.ok || !data.success) throw new Error(data.detalhes || data.error || "Erro na geração");
+        if (!response.ok || !data.success) {
+          throw new Error(data.error || "Erro ao gerar a chave PIX.");
+        }
 
+        chavePix = data.pixKey;
         checkoutId = data.checkoutId;
-        pixKeyText = data.pixKey;
 
-        pixKeyDiv.innerText = pixKeyText;
-        pixKeyDiv.style.display = "block";
-        instrucoes.style.display = "block";
-        verificarBtn.style.display = "inline-block";
+        // Preenche as áreas com a chave
+        document.getElementById("pixTopo").innerText = chavePix;
+        document.getElementById("pixTopo").style.display = "block";
+        document.getElementById("pixKey").innerText = chavePix;
+        document.
+          getElementById("pixKey").style.display = "block";
 
-        pixButton.innerText = "Copiar chave PIX";
-        pixButton.disabled = false;
-        pixButton.onclick = copyPixKey;
+        document.getElementById("btnPix").style.display = "none";
+        document.getElementById("btnCopiar").style.display = "block";
+        document.getElementById("btnVerificar").style.display = "block";
 
-      } catch (error) {
-        errorDiv.innerText = error.message;
-        pixButton.innerText = "Gerar chave PIX";
-        pixButton.disabled = false;
+      } catch (err) {
+        document.getElementById("erroMsg").innerText = err.message;
+        botao.disabled = false;
+        botao.innerText = "Gerar chave PIX";
       }
     }
 
-    function copyPixKey() {
-      navigator.clipboard.writeText(pixKeyText)
-        .then(() => alert("Chave PIX copiada!"))
-        .catch(() => alert("Erro ao copiar."));
+    function copiarChave() {
+      if (!chavePix) return alert("Chave ainda não gerada.");
+      navigator.clipboard.writeText(chavePix)
+        .then(() => alert("Chave copiada!"))
+        .catch(() => alert("Erro ao copiar chave."));
     }
 
-    async function verificarPagamento(event) {
+    async function verificarPagamento() {
       if (!checkoutId) {
-        alert("Gere a chave PIX primeiro.");
+        alert("Gere a chave primeiro.");
         return;
       }
 
-      const btn = event.target;
+      const btn = document.getElementById("btnVerificar");
       btn.disabled = true;
       btn.innerText = "Verificando...";
 
@@ -219,48 +197,18 @@
         const data = await res.json();
 
         if (data.success && data.data.status === "paid") {
-          alert("Pagamento confirmado!");
+          alert("✅ Pagamento confirmado! Redirecionando...");
           window.location.href = "https://julia-licee.systeme.io/entregavel";
         } else {
-          alert("Pagamento ainda não confirmado. Tente de novo.");
+          alert("Pagamento ainda não confirmado. Tente novamente em alguns minutos.");
         }
-      } catch (e) {
-        errorDiv.innerText = "Erro ao verificar pagamento.";
+      } catch (err) {
+        document.getElementById("erroMsg").innerText = "Erro na verificação.";
       } finally {
         btn.disabled = false;
-        btn.innerText = "✅ Verificar Status do Pagamento";
+        btn.innerText = "✅ Verificar pagamento";
       }
     }
-
-    function startCountdown(duration) {
-      let timer = duration, minutes, seconds;
-      const countdown = document.getElementById("countdown");
-      setInterval(() => {
-        minutes = parseInt(timer / 60, 10);
-        seconds = parseInt(timer % 60, 10);
-        countdown.textContent = ${minutes < 10 ? "0" : ""}${minutes}:${seconds < 10 ? "0" : ""}${seconds};
-        if (--timer < 0) timer = 0;
-      }, 1000);
-    }
-
-    function showFloatingMessage(text, delay) {
-      setTimeout(() => {
-        const box = document.getElementById("floating-msg");
-        box.innerText = text;
-        box.style.display = "block";
-        setTimeout(() => {
-          box.style.display = "none";
-        }, 2000);
-      }, delay);
-    }
-
-    // Inicia tudo
-    window.onload = () => {
-      startCountdown(300); // 5 minutos
-      showFloatingMessage("7 pessoas estão comprando o conteúdo nesse momento", 5000);
-      showFloatingMessage("14 pessoas estão comprando o conteúdo nesse momento", 18000);
-      showFloatingMessage("35 pessoas estão comprando o conteúdo nesse momento", 27000);
-    };
   </script>
 </body>
 </html>
