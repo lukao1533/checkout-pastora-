@@ -114,29 +114,11 @@
       margin-top: 10px;
       font-weight: bold;
     }
-
-    .notificacao {
-      position: fixed;
-      top: 50px;
-      right: 10px;
-      background: #333;
-      color: #fff;
-      padding: 8px 12px;
-      border-radius: 6px;
-      font-size: 13px;
-      opacity: 0;
-      z-index: 1000;
-      transition: opacity 0.5s ease;
-    }
-
-    .notificacao.show {
-      opacity: 1;
-    }
   </style>
 </head>
 <body>
   <div class="cronometro">
-    ⏰ Oferta por tempo limitado: <span id="timer">05:00</span>
+    ⏰ Oferta por tempo limitado
   </div>
 
   <div class="container">
@@ -163,8 +145,6 @@
     <div class="erro" id="erroMsg"></div>
   </div>
 
-  <div class="notificacao" id="notificacao"></div>
-
   <script>
     let checkoutId = null;
     let chavePix = '';
@@ -187,7 +167,8 @@
 
         document.getElementById("pixKey").innerText = chavePix;
         document.getElementById("pixKey").style.display = "block";
-        document.getElementById("btnPix").style.display = "none";
+        document.getElementById("btnPix").style.
+          display = "none";
         document.getElementById("btnCopiar").style.display = "block";
         document.getElementById("btnVerificar").style.display = "block";
         document.getElementById("mensagemPix").style.display = "block";
@@ -233,34 +214,6 @@
         btn.innerText = "✅ Verificar pagamento";
       }
     }
-
-    // Cronômetro
-    let tempo = 5 * 60;
-    const timerEl = document.getElementById("timer");
-    setInterval(() => {
-      const minutos = Math.floor(tempo / 60);
-      const segundos = tempo % 60;
-      timerEl.textContent = ${minutos.toString().padStart(2, '0')}:${segundos.toString().padStart(2, '0')};
-      if (tempo > 0) tempo--;
-    }, 1000);
-
-    // Notificações fake
-    const notificacao = document.getElementById("notificacao");
-    const mensagens = [
-      "🔥 7 pessoas estão comprando agora...",
-      "🔥 18 pessoas acessando esse conteúdo...",
-      "🔥 35 pessoas estão no checkout agora..."
-    ];
-
-    const tempos = [5000, 18000, 27000];
-
-    tempos.forEach((tempo, i) => {
-      setTimeout(() => {
-        notificacao.textContent = mensagens[i];
-        notificacao.classList.add("show");
-        setTimeout(() => notificacao.classList.remove("show"), 2500);
-      }, tempo);
-    });
   </script>
 </body>
 </html>
